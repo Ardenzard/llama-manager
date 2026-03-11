@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, patch, call
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.downloader import ModelDownloader
+from llama_manager.downloader import ModelDownloader
 
 
 class TestSanitize(unittest.TestCase):
@@ -33,7 +33,7 @@ class TestSanitize(unittest.TestCase):
         self.assertEqual(model, 'user/repo')
 
     def test_full_hf_url_stripped(self):
-        from app.constants import HF_BASE
+        from llama_manager.constants import HF_BASE
         url = f'{HF_BASE}/user/repo'
         model, _ = self.dl.sanitize(url, 'main')
         self.assertEqual(model, 'user/repo')

@@ -23,7 +23,7 @@ import unittest
 # Allow running tests from the repo root without installing the package.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.config import DEFAULT_CONFIG, LlamaConfigManager
+from llama_manager.config import DEFAULT_CONFIG, LlamaConfigManager
 
 
 class TestDefaultConfig(unittest.TestCase):

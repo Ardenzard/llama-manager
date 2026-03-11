@@ -50,12 +50,12 @@ start.bat
 ```
 or
 ```
-python -m app
+python -m llama_manager
 ```
 
 **Linux / macOS**
 ```
-python -m app
+python -m llama_manager
 ```
 
 ---
@@ -99,9 +99,9 @@ python -m unittest discover tests/
 ## Project Structure
 
 ```
-app/                    Python package
+llama_manager/          Python package
 ├── __init__.py
-├── __main__.py         Entry point (python -m app)
+├── __main__.py         Entry point (python -m llama_manager)
 ├── app.py              LlamaManagerApp — main window and all tabs
 ├── config.py           LlamaConfigManager + DEFAULT_CONFIG
 ├── constants.py        QUANTS, HF_BASE, pipeline path defaults

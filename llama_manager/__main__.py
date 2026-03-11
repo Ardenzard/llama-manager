@@ -1,7 +1,7 @@
 """
 Entry point when the package is run as a module::
 
-    python -m app
+    python -m llama_manager
 """
 
 import tkinter as tk

@@ -8,7 +8,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.themes import CLASSIC_THEME, MODERN_THEME, THEMES
+from llama_manager.themes import CLASSIC_THEME, MODERN_THEME, THEMES
 
 REQUIRED_KEYS = {
     'name', 'bg', 'bg_surface', 'bg_raised', 'bg_input',

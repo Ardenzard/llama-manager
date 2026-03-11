@@ -3,7 +3,7 @@ llama_manager (app) — GUI controller for llama.cpp servers and Open WebUI.
 
 Typical usage::
 
-    python -m app
+    python -m llama_manager
 
 Non-GUI submodules (config, constants, downloader, themes) are imported
 eagerly and are safe to use in headless / test environments.  The GUI
@@ -39,4 +39,4 @@ def __getattr__(name):
     if name == 'ThemedButton':
         from .widgets import ThemedButton
         return ThemedButton
-    raise AttributeError(f"module 'app' has no attribute {name!r}")
+    raise AttributeError(f"module 'llama_manager' has no attribute {name!r}")

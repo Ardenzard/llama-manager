@@ -8,7 +8,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.constants import (
+from llama_manager.constants import (
     DEFAULT_CONVERT_SCRIPT,
     DEFAULT_GGUF_DIR,
     DEFAULT_QUANTIZE_BIN,

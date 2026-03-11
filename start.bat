@@ -1,2 +1,2 @@
 @echo off
-python -m app
+python -m llama_manager
