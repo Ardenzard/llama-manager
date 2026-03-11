@@ -2,7 +2,8 @@
 
 A GUI controller for [llama.cpp](https://github.com/ggerganov/llama.cpp) servers and [Open WebUI](https://github.com/open-webui/open-webui), with a built-in pipeline for downloading, converting, and quantising HuggingFace models.
 
-![Llama Manager screenshot – dark modern theme](docs/screenshot.png)
+> **⚠️ Vibe Coded**
+> This project was entirely vibe coded. The code works for my use case but has not been rigorously reviewed or hardened. Use it at your own risk, expect rough edges, and feel free to improve it.
 
 ---
 
