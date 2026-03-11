@@ -21,14 +21,7 @@ A GUI controller for [llama.cpp](https://github.com/ggerganov/llama.cpp) servers
 
 - Python 3.10+
 - `tkinter` (ships with most Python installs; on Linux: `sudo apt install python3-tk`)
-- `requests` — only required for the Pipeline downloader
-
-```
-pip install requests
-```
-
-Optional:
-- `huggingface_hub` — enables automatic HF token authentication
+- Dependencies listed in `requirements.txt`
 
 ---
 
@@ -37,7 +30,7 @@ Optional:
 ```bash
 git clone https://github.com/your-username/llama-manager.git
 cd llama-manager
-pip install requests          # optional but recommended
+pip install -r requirements.txt
 ```
 
 ---
