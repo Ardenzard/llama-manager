@@ -139,6 +139,23 @@ class LlamaManagerApp:
         if chosen != self.current_theme['name']:
             self.switch_theme(chosen)
 
+    def _add_entry_shortcuts(self, widget) -> None:
+        """Add standard keyboard shortcuts (Ctrl+A, Ctrl+V, etc.) to an Entry/Spinbox."""
+        widget.bind('<Control-a>', lambda e: self._select_all(e, widget))
+        widget.bind('<Control-A>', lambda e: self._select_all(e, widget))
+        # Ensure standard copy/paste work even if the OS-level defaults are missing
+        widget.bind('<Control-v>', lambda e: widget.event_generate('<<Paste>>'))
+        widget.bind('<Control-V>', lambda e: widget.event_generate('<<Paste>>'))
+        widget.bind('<Control-c>', lambda e: widget.event_generate('<<Copy>>'))
+        widget.bind('<Control-C>', lambda e: widget.event_generate('<<Copy>>'))
+        widget.bind('<Control-x>', lambda e: widget.event_generate('<<Cut>>'))
+        widget.bind('<Control-X>', lambda e: widget.event_generate('<<Cut>>'))
+
+    def _select_all(self, event, widget) -> str:
+        widget.selection_range(0, 'end')
+        widget.icursor('end')
+        return 'break'
+
     def switch_theme(self, theme_name: str) -> None:
         """Rebuild the entire UI under a new theme."""
         prev_tab = getattr(self, '_active_tab', 'settings')
@@ -348,6 +365,7 @@ class LlamaManagerApp:
 
     def add_model(self) -> None:
         file_path = filedialog.askopenfilename(
+            parent=self.root,
             filetypes=[('GGUF files', '*.gguf'), ('All files', '*.*')])
         if file_path:
             file_path = os.path.normpath(file_path)
@@ -392,16 +410,17 @@ class LlamaManagerApp:
                      fg=t['fg'], bg=t['bg'], anchor='w').grid(
                 row=r + 2, column=0, padx=(16, 8), pady=9, sticky='w')
             var = tk.StringVar(value=default)
-            tk.Entry(win, textvariable=var,
-                     font=t['font_mono'] if mono else t['font_body'],
-                     bg=t['bg_input'], fg=t['fg'],
-                     insertbackground=t['accent'],
-                     selectbackground=t['accent_dim'], selectforeground=t['fg'],
-                     relief='flat', bd=4,
-                     highlightthickness=1,
-                     highlightbackground=t['border'],
-                     highlightcolor=t['border_focus']).grid(
-                row=r + 2, column=1, padx=(0, 8), pady=7, sticky='ew')
+            e = tk.Entry(win, textvariable=var,
+                         font=t['font_mono'] if mono else t['font_body'],
+                         bg=t['bg_input'], fg=t['fg'],
+                         insertbackground=t['accent'],
+                         selectbackground=t['accent_dim'], selectforeground=t['fg'],
+                         relief='flat', bd=4,
+                         highlightthickness=1,
+                         highlightbackground=t['border'],
+                         highlightcolor=t['border_focus'])
+            e.grid(row=r + 2, column=1, padx=(0, 8), pady=7, sticky='ew')
+            self._add_entry_shortcuts(e)
             return var
 
         name_var = field_row(0, 'Name:',     model['name'])
@@ -410,6 +429,7 @@ class LlamaManagerApp:
 
         def browse():
             f = filedialog.askopenfilename(
+                parent=win,
                 filetypes=[('GGUF files', '*.gguf'), ('All files', '*.*')])
             if f:
                 path_var.set(os.path.normpath(f))
@@ -483,9 +503,13 @@ class LlamaManagerApp:
 
         self._section_header(self.sf, 'Server & Llama.cpp Settings', 4)
         server_card = self._section_card(self.sf, 5)
-        skip = {'saved_models', 'app_theme', 'close_on_launch_both'}
+        skip = {'saved_models', 'app_theme', 'close_on_launch_both', 'models_ini_path'}
         for i, (key, value) in enumerate([(k, v) for k, v in self.manager.config.items() if k not in skip]):
             self._setting_row(server_card, key, value, i)
+
+        self._setting_path_row(server_card, 'models_ini_path', 'Models Ini Path',
+                               self.manager.config.get('models_ini_path'),
+                               len(self.manager.config) - len(skip), is_file=True)
 
         self._section_header(self.sf, 'Pipeline Paths', 6)
         pipeline_card = self._section_card(self.sf, 7)
@@ -539,15 +563,16 @@ class LlamaManagerApp:
                            cursor='hand2').pack(side='left', padx=4, pady=8)
         else:
             var = tk.StringVar(value=str(value))
-            tk.Entry(row_f, textvariable=var, font=t['font_mono'],
-                     bg=t['bg_input'], fg=t['fg'],
-                     insertbackground=t['accent'],
-                     selectbackground=t['accent_dim'], selectforeground=t['fg'],
-                     relief='flat', bd=4,
-                     highlightthickness=1,
-                     highlightbackground=t['border'],
-                     highlightcolor=t['border_focus']).pack(
-                side='left', fill='x', expand=True, padx=(0, 16), pady=6)
+            e = tk.Entry(row_f, textvariable=var, font=t['font_mono'],
+                         bg=t['bg_input'], fg=t['fg'],
+                         insertbackground=t['accent'],
+                         selectbackground=t['accent_dim'], selectforeground=t['fg'],
+                         relief='flat', bd=4,
+                         highlightthickness=1,
+                         highlightbackground=t['border'],
+                         highlightcolor=t['border_focus'])
+            e.pack(side='left', fill='x', expand=True, padx=(0, 16), pady=6)
+            self._add_entry_shortcuts(e)
         self.setting_vars[key] = var
 
     def _setting_path_row(self, card, key: str, label: str, value, row_idx: int, is_file: bool = False) -> None:
@@ -562,22 +587,23 @@ class LlamaManagerApp:
         var = tk.StringVar(value=str(value))
 
         def _browse(v=var, f=is_file):
-            p = filedialog.askopenfilename() if f else filedialog.askdirectory()
+            p = filedialog.askopenfilename(parent=self.root) if f else filedialog.askdirectory(parent=self.root)
             if p:
                 v.set(os.path.normpath(p))
 
         ThemedButton(row_f, text='…', command=_browse,
                      btn_style='secondary', theme=t, btn_width=36,
                      canvas_bg=bg).pack(side='right', padx=(4, 12), pady=6)
-        tk.Entry(row_f, textvariable=var, font=t['font_mono'],
-                 bg=t['bg_input'], fg=t['fg'],
-                 insertbackground=t['accent'],
-                 selectbackground=t['accent_dim'], selectforeground=t['fg'],
-                 relief='flat', bd=4,
-                 highlightthickness=1,
-                 highlightbackground=t['border'],
-                 highlightcolor=t['border_focus']).pack(
-            side='left', fill='x', expand=True, padx=(0, 4), pady=6)
+        e = tk.Entry(row_f, textvariable=var, font=t['font_mono'],
+                     bg=t['bg_input'], fg=t['fg'],
+                     insertbackground=t['accent'],
+                     selectbackground=t['accent_dim'], selectforeground=t['fg'],
+                     relief='flat', bd=4,
+                     highlightthickness=1,
+                     highlightbackground=t['border'],
+                     highlightcolor=t['border_focus'])
+        e.pack(side='left', fill='x', expand=True, padx=(0, 4), pady=6)
+        self._add_entry_shortcuts(e)
         self.setting_vars[key] = var
 
     # ══════════════════════════════════════════════════════════════════════════
@@ -590,10 +616,9 @@ class LlamaManagerApp:
             self.manager.config[key] = var.get()
         self.manager.config['app_theme'] = self.current_theme['name']
         self.manager.save_config()
-        if self.manager.save_models():
-            self._toast('Settings and models saved.')
-        else:
-            messagebox.showerror('Error', 'Models INI path not set or invalid.')
+        # save_models() writes to the legacy models.ini file if a path is set.
+        self.manager.save_models()
+        self._toast('Settings saved.')
 
     def _toast(self, msg: str) -> None:
         """Show a brief floating notification in the bottom-right corner."""
@@ -753,19 +778,21 @@ class LlamaManagerApp:
             tk.Label(sf, text=label, font=t['font_body'], fg=t['fg_dim'],
                      bg=t['bg'], anchor='w', width=22).grid(row=r, column=0, sticky='w', **pad)
             var = tk.StringVar(value=default)
-            tk.Entry(sf, textvariable=var,
-                     font=t['font_mono'] if mono else t['font_body'],
-                     bg=t['bg_input'], fg=t['fg'],
-                     insertbackground=t['accent'],
-                     selectbackground=t['accent_dim'], selectforeground=t['fg'],
-                     relief='flat', bd=4,
-                     highlightthickness=1, highlightbackground=t['border'],
-                     highlightcolor=t['border_focus']).grid(row=r, column=1, sticky='ew', **pad)
+            e = tk.Entry(sf, textvariable=var,
+                         font=t['font_mono'] if mono else t['font_body'],
+                         bg=t['bg_input'], fg=t['fg'],
+                         insertbackground=t['accent'],
+                         selectbackground=t['accent_dim'], selectforeground=t['fg'],
+                         relief='flat', bd=4,
+                         highlightthickness=1, highlightbackground=t['border'],
+                         highlightcolor=t['border_focus'])
+            e.grid(row=r, column=1, sticky='ew', **pad)
+            self._add_entry_shortcuts(e)
             return var
 
         def browse_btn(r, var, is_file):
             def _browse():
-                p = filedialog.askopenfilename() if is_file else filedialog.askdirectory()
+                p = filedialog.askopenfilename(parent=self.root) if is_file else filedialog.askdirectory(parent=self.root)
                 if p:
                     var.set(os.path.normpath(p))
             ThemedButton(sf, text='…', command=_browse,
@@ -792,8 +819,10 @@ class LlamaManagerApp:
                  fg=t['fg_dim'], bg=t['bg'], anchor='w', width=22).grid(
             row=row, column=0, sticky='w', **pad)
         self._pl_threads_var = tk.IntVar(value=4)
-        ttk.Spinbox(sf, from_=1, to=16, textvariable=self._pl_threads_var, width=6).grid(
-            row=row, column=1, sticky='w', **pad); row += 1
+        sp = ttk.Spinbox(sf, from_=1, to=16, textvariable=self._pl_threads_var, width=6)
+        sp.grid(row=row, column=1, sticky='w', **pad)
+        self._add_entry_shortcuts(sp)
+        row += 1
 
         self._pl_delete_var = tk.BooleanVar(value=True)
         tk.Checkbutton(sf, text='Delete intermediate files after each step',
