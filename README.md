@@ -25,6 +25,15 @@ A GUI controller for [llama.cpp](https://github.com/ggerganov/llama.cpp) servers
 
 ---
 
+## Pipeline Dependencies
+
+The Pipeline tab requires two external tools from [llama.cpp](https://github.com/ggerganov/llama.cpp):
+
+1. **llama-quantize** — The quantization binary, obtained by building llama.cpp from source or downloading a prebuilt release from the [llama.cpp GitHub releases page](https://github.com/ggerganov/llama.cpp/releases). In **Settings**, point `pipeline_quantize_bin` to this executable.
+2. **convert_hf_to_gguf.py** — A Python script found in the root of the [llama.cpp source repository](https://github.com/ggerganov/llama.cpp). You need to clone or download the repo to get this file, and point `pipeline_convert_script` in **Settings** to it. Its own dependencies can be installed via `pip install -r requirements.txt` from the llama.cpp repo root.
+
+---
+
 ## Installation
 
 ```bash
