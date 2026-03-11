@@ -1,3 +1,2 @@
 app_config.json
-tests/__pycache__
-app/__pycache__
+__pycache__/
