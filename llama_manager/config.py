@@ -99,7 +99,7 @@ class LlamaConfigManager:
         Returns True on success, False if ``models_ini_path`` is not configured.
         """
         path = self.config.get('models_ini_path')
-        if not path:
+        if not path or not path.strip():
             return False
         cfg = configparser.ConfigParser(interpolation=None)
         for m in [x for x in self.models if x.get('enabled', True)]:
