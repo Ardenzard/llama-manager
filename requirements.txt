@@ -1,0 +1,2 @@
+huggingface_hub==1.4.0
+Requests==2.32.5
